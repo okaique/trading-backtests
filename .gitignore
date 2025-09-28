@@ -1,0 +1,71 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+*.dll
+*.dylib
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+*.manifest
+*.spec
+*.cfg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+*.env
+
+# Logs, caches, cobertura de teste
+*.log
+*.log.*
+htmlcov/
+.coverage
+.coverage.*
+.cache/
+.pytest_cache/
+nose2-*.xml
+coverage.xml
+*.cover
+*.pyc
+.mypy_cache/
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Jupyter / Notebook
+.ipynb_checkpoints/
+
+# SQL / database / data files local
+*.sqlite
+*.db
+
+# Docker / Compose / local containers
+docker-compose.override.yml
+.env.local
+*.local
+
+# Misc
+*.bak
+*.tmp
+*.swp
