@@ -11,6 +11,7 @@ from app.db.models.symbol import Symbol
 from app.db.models.backtest import Backtest
 from app.db.models.backtest_trade import BacktestTrade
 from app.db.models.backtest_position import BacktestPosition
+from app.strategies.sma_cross_risk import SMACrossRisk
 
 
 def load_price_data_from_db(
@@ -354,3 +355,125 @@ def get_backtest_results(backtest_id: int):
         }
     finally:
         db.close()
+
+
+def run_backtest_sma_cross_risk(
+    ticker: str,
+    fast: int = 10,
+    slow: int = 30,
+    atr_period: int = 14,
+    atr_mult: float = 2.0,
+    risk_per_trade: float = 0.01,
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+    initial_cash: float = 100000.0,
+):
+    df = load_price_data_from_db(ticker, start, end)
+
+    cerebro = bt.Cerebro()
+    feed = bt.feeds.PandasData(dataname=df)
+    cerebro.adddata(feed)
+
+    cerebro.addstrategy(
+        SMACrossRisk,
+        fast_period=fast,
+        slow_period=slow,
+        atr_period=atr_period,
+        atr_mult=atr_mult,
+        risk_per_trade=risk_per_trade,
+    )
+
+    cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharpe", timeframe=bt.TimeFrame.Days, riskfreerate=0.0)
+    cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
+
+    cerebro.broker.setcash(initial_cash)
+    cerebro.broker.setcommission(commission=0.001)
+    max_period = max(fast, slow, atr_period)
+    runonce = len(df) > max_period
+    run = cerebro.run(runonce=runonce)
+    strat: SMACrossRisk = run[0]
+    final_value = float(cerebro.broker.getvalue())
+
+    metrics = _extract_metrics_from_strategy(strat, initial_cash, final_value)
+
+    return {
+        "ticker": ticker,
+        "fast_period": fast,
+        "slow_period": slow,
+        "atr_period": atr_period,
+        "atr_mult": atr_mult,
+        "risk_per_trade": risk_per_trade,
+        "start": start,
+        "end": end,
+        "initial_cash": initial_cash,
+        "final_value": final_value,
+        "metrics": metrics,
+    }
+
+
+def run_backtest_and_save_risk(
+    ticker: str,
+    fast: int = 10,
+    slow: int = 30,
+    atr_period: int = 14,
+    atr_mult: float = 2.0,
+    risk_per_trade: float = 0.01,
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+    initial_cash: float = 100000.0,
+):
+    db = SessionLocal()
+    try:
+        result = run_backtest_sma_cross_risk(
+            ticker=ticker,
+            fast=fast,
+            slow=slow,
+            atr_period=atr_period,
+            atr_mult=atr_mult,
+            risk_per_trade=risk_per_trade,
+            start=start,
+            end=end,
+            initial_cash=initial_cash,
+        )
+
+        backtest = Backtest(
+            ticker=ticker,
+            fast_period=fast,
+            slow_period=slow,
+            start=start,
+            end=end,
+            initial_cash=initial_cash,
+            final_value=result["final_value"],
+            status="completed",
+            metrics=result["metrics"] | {
+                "atr_period": atr_period,
+                "atr_mult": atr_mult,
+                "risk_per_trade": risk_per_trade,
+            },
+        )
+        db.add(backtest)
+        db.commit()
+        db.refresh(backtest)
+
+        return {
+            "id": backtest.id,
+            "ticker": ticker,
+            "fast_period": fast,
+            "slow_period": slow,
+            "atr_period": atr_period,
+            "atr_mult": atr_mult,
+            "risk_per_trade": risk_per_trade,
+            "start": start,
+            "end": end,
+            "initial_cash": initial_cash,
+            "final_value": result["final_value"],
+            "status": "completed",
+        }
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+
+
