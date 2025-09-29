@@ -14,6 +14,6 @@ class Backtest(Base):
     end = Column(String, nullable=True)
     initial_cash = Column(Float, nullable=False)
     final_value = Column(Float, nullable=True)
-    status = Column(String, default="completed")  # pending | running | completed | failed
+    status = Column(String, default="completed")
     metrics = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

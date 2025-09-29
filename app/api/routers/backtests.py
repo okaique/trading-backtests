@@ -1,10 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.services.backtest_service import run_backtest_and_save
-
+from app.services.backtest_service import run_backtest_and_save, get_backtest_results
 
 router = APIRouter(prefix="/backtests", tags=["backtests"])
-
 
 class BacktestRequest(BaseModel):
     ticker: str
@@ -29,3 +27,11 @@ def run_backtest(req: BacktestRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{backtest_id}/results")
+def get_results(backtest_id: int):
+    result = get_backtest_results(backtest_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Backtest não encontrado")
+    return result
