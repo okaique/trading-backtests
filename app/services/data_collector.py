@@ -130,8 +130,13 @@ def update_prices_for_ticker(
     start: Optional[str] = None,
     end: Optional[str] = None,
     interval: str = "1d",
+    db=None
 ) -> dict:
-    db = SessionLocal()
+    close_db = False
+    if db is None:
+        db = SessionLocal()
+        close_db = True
+
     try:
         symbol = db.execute(
             select(Symbol).where(Symbol.ticker == ticker)
@@ -167,7 +172,8 @@ def update_prices_for_ticker(
             "message": "Preços atualizados com sucesso.",
         }
     finally:
-        db.close()
+        if close_db:
+            db.close()
 
 
 def main():

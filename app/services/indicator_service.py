@@ -12,8 +12,12 @@ def calculate_sma(prices: pd.DataFrame, window: int) -> pd.Series:
     return prices["close"].rolling(window=window).mean()
 
 
-def update_sma_for_ticker(ticker: str, window: int = 20) -> dict:
-    db = SessionLocal()
+def update_sma_for_ticker(ticker: str, window: int = 20, db=None) -> dict:
+    close_db = False
+    if db is None:
+        db = SessionLocal()
+        close_db = True
+
     try:
         symbol = db.execute(
             select(Symbol).where(Symbol.ticker == ticker)
@@ -31,10 +35,7 @@ def update_sma_for_ticker(ticker: str, window: int = 20) -> dict:
                 "message": "Nenhum preço encontrado."
             }
 
-        df = pd.DataFrame(
-            [{"date": p.date, "close": p.close} for p in prices]
-        ).set_index("date")
-
+        df = pd.DataFrame([{"date": p.date, "close": p.close} for p in prices]).set_index("date")
         sma_series = calculate_sma(df, window)
 
         rows = []
@@ -67,4 +68,5 @@ def update_sma_for_ticker(ticker: str, window: int = 20) -> dict:
             "message": "SMA atualizado com sucesso."
         }
     finally:
-        db.close()
+        if close_db:
+            db.close()
