@@ -8,10 +8,10 @@ class Price(Base):
     id = Column(Integer, primary_key=True, index=True)
     symbol_id = Column(Integer, ForeignKey("symbols.id"), nullable=False)
     date = Column(Date, nullable=False)
-    open = Column(Float, nullable=False)
-    high = Column(Float, nullable=False)
-    low = Column(Float, nullable=False)
-    close = Column(Float, nullable=False)
+    open = Column(Float, nullable=True)
+    high = Column(Float, nullable=True)
+    low = Column(Float, nullable=True)
+    close = Column(Float, nullable=True)
     volume = Column(Float, nullable=True)
 
     __table_args__ = (

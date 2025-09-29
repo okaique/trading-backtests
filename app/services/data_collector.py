@@ -56,10 +56,19 @@ def fetch_prices_yf(
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = [col[1] if isinstance(col, tuple) else col for col in df.columns]
 
+    rename_map = {c: c.capitalize() for c in df.columns}
+    df = df.rename(columns=rename_map)
+
+    expected = ["Open", "High", "Low", "Close", "Volume"]
+    for col in expected:
+        if col not in df.columns:
+            df[col] = None
+
     if df.index.tz is not None:
         df.index = df.index.tz_convert(None)
 
-    return df[["Open", "High", "Low", "Close", "Volume"]]
+    return df[expected]
+
 
 
 def _prepare_rows_for_insert(df: pd.DataFrame, symbol_id: int) -> List[dict]:
