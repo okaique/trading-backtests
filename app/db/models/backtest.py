@@ -8,8 +8,10 @@ class Backtest(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     ticker = Column(String, nullable=False)
-    fast_period = Column(Integer, nullable=False)
-    slow_period = Column(Integer, nullable=False)
+    strategy_type = Column(String, nullable=False, default="sma_cross")
+    strategy_params = Column(JSON, nullable=True)
+    fast_period = Column(Integer, nullable=True)
+    slow_period = Column(Integer, nullable=True)
     start = Column(String, nullable=True)
     end = Column(String, nullable=True)
     initial_cash = Column(Float, nullable=False)

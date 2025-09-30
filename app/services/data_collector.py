@@ -27,7 +27,7 @@ def _normalize_datestr(date_str: Optional[str]) -> Optional[str]:
                 return dt.strftime("%Y-%m-%d")
             except ValueError:
                 continue
-        raise ValueError(f"Formato de data inválido: '{date_str}'. Use YYYY-MM-DD.")
+        raise ValueError(f"Formato de data invAlido: '{date_str}'. Use YYYY-MM-DD.")
 
 
 def fetch_prices_yf(
@@ -143,7 +143,7 @@ def update_prices_for_ticker(
         ).scalar_one_or_none()
 
         if symbol is None:
-            raise ValueError(f"Ticker '{ticker}' não encontrado na base.")
+            raise ValueError(f"Ticker '{ticker}' nAo encontrado na base.")
 
         df = fetch_prices_yf(ticker=ticker, start=start, end=end, interval=interval)
 
@@ -169,7 +169,7 @@ def update_prices_for_ticker(
             "downloaded": len(candidate_rows),
             "inserted": inserted_attempts,
             "skipped": len(candidate_rows) - inserted_attempts,
-            "message": "Preços atualizados com sucesso.",
+            "message": "Precos atualizados com sucesso.",
         }
     finally:
         if close_db:
@@ -177,7 +177,7 @@ def update_prices_for_ticker(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Atualiza preços OHLCV de um ticker usando Yahoo Finance.")
+    parser = argparse.ArgumentParser(description="Atualiza Precos OHLCV de um ticker usando Yahoo Finance.")
     parser.add_argument("--ticker", required=True, help="Ticker (ex.: PETR4.SA)")
     parser.add_argument("--start", required=False, default=None, help="Data inicial (YYYY-MM-DD)")
     parser.add_argument("--end", required=False, default=None, help="Data final (YYYY-MM-DD)")

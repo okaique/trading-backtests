@@ -3,7 +3,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.db.base import Base
-from app.db.session import SessionLocal
 from app.db.models.symbol import Symbol
 from app.db.models.price import Price
 from app.db.models.indicator import Indicator
@@ -17,11 +16,18 @@ def test_engine():
 
 
 @pytest.fixture(scope="function")
-def db_session(test_engine):
+def db_session(test_engine, monkeypatch):
     connection = test_engine.connect()
     transaction = connection.begin()
     Session = sessionmaker(bind=connection, autoflush=False, autocommit=False)
     session = Session()
+
+    # Ensure application code uses the in-memory session
+    import app.db.session as session_module
+    import app.services.backtest_service as backtest_service
+
+    monkeypatch.setattr(session_module, "SessionLocal", Session)
+    monkeypatch.setattr(backtest_service, "SessionLocal", Session)
 
     yield session
 

@@ -37,4 +37,4 @@ def test_update_prices_for_ticker_with_mock(mocker, db_session, seed_symbol):
     result = update_prices_for_ticker("PETR4.SA", db=db_session)
     assert result["inserted"] == 2
     assert result["skipped"] == 0
-    assert result["message"] == "Preços atualizados com sucesso."
+    assert result["message"] == "Precos atualizados com sucesso."
