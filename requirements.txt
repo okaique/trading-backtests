@@ -12,3 +12,5 @@ python-dotenv>=1.0
 structlog>=22.0
 orjson>=3.8
 httpx>=0.24
+matplotlib>=3.7
+apscheduler>=3.10

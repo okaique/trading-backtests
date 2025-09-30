@@ -1,3 +1,5 @@
 pytest>=8.0
 pytest-mock>=3.10
 pytest-cov
+matplotlib>=3.7
+apscheduler>=3.10
